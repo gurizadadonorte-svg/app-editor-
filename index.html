@@ -299,7 +299,117 @@ function zerarDuelo(){
   document.getElementById('caixaVencedor').style.display = 'none';
 }
 
-carregarMusicas();
+carregarMusicas();// ========== SISTEMA DE VOTAÇÃO FIREBASE ==========
+
+// Salvar duelo no Firebase
+async function salvarDueloNoBanco(dueloId, dados) {
+  try {
+    await db.collection('duelos').doc(dueloId).set(dados);
+    console.log('✅ Duelo salvo na nuvem!');
+  } catch (erro) {
+    console.error('❌ Erro ao salvar:', erro);
+  }
+}
+
+// Carregar duelo do Firebase
+async function carregarDueloDoBanco(dueloId) {
+  try {
+    const doc = await db.collection('duelos').doc(dueloId).get();
+    if (doc.exists) {
+      return doc.data();
+    }
+    return null;
+  } catch (erro) {
+    console.error('❌ Erro ao carregar:', erro);
+    return null;
+  }
+}
+
+// Registrar voto no Firebase
+async function registrarVotoNoBanco(dueloId, opcao) {
+  try {
+    const ref = db.collection('duelos').doc(dueloId);
+    await ref.update({
+      [`voto${opcao}`]: (await ref.get()).data()[`voto${opcao}`] + 1
+    });
+    console.log(`✅ Voto ${opcao} registrado na nuvem!`);
+  } catch (erro) {
+    console.error('❌ Erro ao votar:', erro);
+  }
+}
+
+// Escutar mudanças em tempo real
+function escutarDuelo(dueloId, callback) {
+  return db.collection('duelos').doc(dueloId)
+    .onSnapshot(snapshot => {
+      if (snapshot.exists) {
+        callback(snapshot.data());
+      }
+    });
+}
+
+// Atualizar contagem na tela com dados da nuvem
+function atualizarContagemEmTempoReal(dados) {
+  if (!dados) return;
+  
+  const total = dados.voto1 + dados.voto2 || 1;
+  const p1 = Math.round((dados.voto1 / total) * 100);
+  const p2 = 100 - p1;
+  
+  // Atualizar os elementos na tela
+  const votos1 = document.getElementById('votos1');
+  const votos2 = document.getElementById('votos2');
+  const porc1 = document.getElementById('porc1');
+  const porc2 = document.getElementById('porc2');
+  const barra1 = document.getElementById('barra1');
+  const barra2 = document.getElementById('barra2');
+  
+  if (votos1) votos1.textContent = dados.voto1;
+  if (votos2) votos2.textContent = dados.voto2;
+  if (porc1) porc1.textContent = p1 + '%';
+  if (porc2) porc2.textContent = p2 + '%';
+  if (barra1) barra1.style.width = p1 + '%';
+  if (barra2) barra2.style.width = p2 + '%';
+}
+
+// Criar novo duelo no Firebase
+async function criarDueloFirebase(nome1, nome2) {
+  const dueloId = 'duelo_atual';
+  const dados = {
+    nome1: nome1,
+    nome2: nome2,
+    voto1: 0,
+    voto2: 0,
+    criadoEm: new Date()
+  };
+  
+  await salvarDueloNoBanco(dueloId, dados);
+  
+  // Começar escutando em tempo real
+  escutarDuelo(dueloId, atualizarContagemEmTempoReal);
+  
+  return dados;
+}
+
+// Votar pela nuvem
+async function votarFirebase(opcao) {
+  const dueloId = 'duelo_atual';
+  await registrarVotoNoBanco(dueloId, opcao);
+}
+
+// Carregar duelo ao abrir a página
+async function iniciarDuelo() {
+  const dueloId = 'duelo_atual';
+  const dados = await carregarDueloDoBanco(dueloId);
+  
+  if (dados) {
+    escutarDuelo(dueloId, atualizarContagemEmTempoReal);
+  }
+}
+
+// Iniciar quando a página carregar
+document.addEventListener('DOMContentLoaded', iniciarDuelo);
+  
 </script>
 </body>
 </html>
