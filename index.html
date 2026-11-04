@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎬 Editor Agro</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif;}
+    :root{
+      --primaria: #10b981;
+      --secundaria: #f59e0b;
+      --fundo: #0f172a;
+      --cartao: #1e293b;
+      --texto: #f1f5f9;
+      --texto-claro: #94a3b8;
+      --funk: #8b5cf6;
+      --sertanejo: #f97316;
+      --voto1: #3b82f6;
+      --voto2: #ef4444;
+    }
+    body{background: var(--fundo);min-height: 100vh;padding: 20px 16px;color: var(--texto);}
+    .container{max-width: 460px;margin: 0 auto;}
+    .cabecalho{text-align: center;margin-bottom: 24px;}
+    .logo{font-size: 26px;font-weight: 800;color: var(--primaria);margin-bottom: 4px;}
+    .slogan{font-size: 13px;color: var(--texto-claro);}
+    .abas{display: flex;gap: 8px;margin-bottom: 20px;}
+    .aba{flex:1;padding:10px 8px;border:none;background:transparent;color: var(--texto-claro);font-size: 14px;font-weight: 500;border-radius: 8px;cursor: pointer;transition: all 0.2s;}
+    .aba.ativa{background: var(--primaria);color: white;}
+    .cartao{background: var(--cartao);border-radius: 16px;padding: 20px;margin-bottom: 16px;}
+    .titulo-secao{font-size: 15px;color: var(--primaria);margin-bottom: 16px;font-weight: 600;}
+    
+    .filtros-estilo{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+    .botao-filtro{padding:8px 14px;border-radius:20px;border:none;font-size:13px;font-weight:500;cursor:pointer;background:rgba(255,255,255,0.03);color:var(--texto-claro);}
+    .botao-filtro.ativo-filtro{background:var(--primaria);color:white;}
+    .botao-filtro.funk.ativo-filtro{background:var(--funk);}
+    .botao-filtro.sertanejo.ativo-filtro{background:var(--sertanejo);}
+    
+    .musica-item{display:flex;align-items:center;gap:12px;padding:12px;background:rgba(255,255,255,0.02);border-radius:10px;margin-bottom:8px;border-left:3px solid transparent;}
+    .musica-item.funk{border-left-color:var(--funk);}
+    .musica-item.sertanejo{border-left-color:var(--sertanejo);}
+    .posicao{width:32px;height:32px;border-radius:50%;background:var(--primaria);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}
+    .musica-info{flex:1;}
+    .musica-nome{font-weight:600;font-size:15px;margin-bottom:3px;}
+    .musica-artista{font-size:12px;color:var(--texto-claro);margin-bottom:4px;}
+    .tag-estilo{display:inline-block;font-size:10px;padding:2px 8px;border-radius:10px;margin-right:6px;}
+    .tag-estilo.funk{background:rgba(139,92,246,0.15);color:#c4b5fd;}
+    .tag-estilo.sertanejo{background:rgba(249,115,22,0.15);color:#fdba74;}
+    .musica-tendencia{font-size:11px;padding:3px 8px;border-radius:10px;background:rgba(16,185,129,0.1);color:var(--primaria);white-space:nowrap;}
+    
+    .grade-dias{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:20px;}
+    .dia{padding:12px 6px;text-align:center;border-radius:8px;background:rgba(255,255,255,0.02);font-size:13px;}
+    .dia.melhor{background:rgba(16,185,129,0.1);color:var(--primaria);font-weight:600;}
+    .horarios-lista{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;}
+    .horario{padding:10px 14px;border-radius:6px;background:rgba(16,185,129,0.1);color:var(--primaria);font-size:14px;}
+    .horario-medio{background:rgba(245,158,11,0.1);color:var(--secundaria);}
+    
+    .duelo-container{display:flex;flex-direction:column;gap:16px;margin-bottom:20px;}
+    .opcao-voto{padding:25px;border-radius:12px;text-align:center;cursor:pointer;transition:all 0.3s;}
+    .opcao-voto:nth-child(1){background:rgba(59,130,246,0.08);}
+    .opcao-voto:nth-child(2){background:rgba(239,68,68,0.08);}
+    .opcao-voto.selecionada-1{border:2px solid var(--voto1);transform:scale(1.02);}
+    .opcao-voto.selecionada-2{border:2px solid var(--voto2);transform:scale(1.02);}
+    .nome-edit{font-weight:700;font-size:18px;margin-bottom:8px;}
+    .contagem-votos{font-size:32px;font-weight:800;margin-bottom:4px;}
+    .porcentagem{font-size:14px;color:var(--texto-claro);}
+    .barra-progresso{height:10px;background:rgba(255,255,255,0.05);border-radius:5px;overflow:hidden;margin-top:15px;display:flex;}
+    .barra-1{height:100%;background:var(--voto1);width:50%;transition:width 0.4s;}
+    .barra-2{height:100%;background:var(--voto2);width:50%;transition:width 0.4s;}
+    .botoes-duelo{display:flex;gap:10px;margin-top:20px;}
+    button.botao-principal{flex:1;padding:14px;border:none;border-radius:10px;background:var(--primaria);color:white;font-size:15px;font-weight:600;cursor:pointer;}
+    button.botao-secundario{flex:1;padding:14px;border:none;border-radius:10px;background:rgba(255,255,255,0.05);color:var(--texto);font-size:14px;cursor:pointer;}
+    .input-duelo{width:100%;padding:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:white;font-size:15px;margin-bottom:12px;outline:none;}
+    .vencedor{text-align:center;padding:20px;background:rgba(16,185,129,0.1);border-radius:12px;color:var(--primaria);font-size:20px;font-weight:700;margin-top:20px;display:none;}
+    .pagina{display:none;}
+    .pagina.visivel{display:block;}
+    .rodape{text-align:center;margin-top:40px;font-size:12px;color:var(--texto-claro);}
+    .atualizado-em{font-size:12px;color:var(--texto-claro);text-align:right;margin-top:10px;}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="cabecalho">
+      <div class="logo">🎬 EDITOR AGRO</div>
+      <p class="slogan">Músicas virais · Melhores horários · Duelo de Edits</p>
+    </header>
+
+    <div class="abas">
+      <button class="aba ativa" onclick="mostrarPagina('musicas')">🎵 Músicas</button>
+      <button class="aba" onclick="mostrarPagina('horarios')">⏰ Horários</button>
+      <button class="aba" onclick="mostrarPagina('duelo')">⚔️ Duelo</button>
+    </div>
+
+    <div class="pagina visivel" id="pagina-musicas">
+      <div class="cartao">
+        <p class="titulo-secao">🔥 MÚSICAS VIRAIS — SEMANA 04/11/2026</p>
+        <div class="filtros-estilo">
+          <button class="botao-filtro ativo-filtro" data-filtro="todas" onclick="filtrarMusicas('todas')">Todas</button>
+          <button class="botao-filtro funk" data-filtro="funk" onclick="filtrarMusicas('funk')">🎵 Funk</button>
+          <button class="botao-filtro sertanejo" data-filtro="sertanejo" onclick="filtrarMusicas('sertanejo')">🎤 Sertanejo</button>
+        </div>
+        <div id="lista-musicas"></div>
+        <p class="atualizado-em">Semana de 04 a 10 de Novembro de 2026</p>
+      </div>
+    </div>
+
+    <div class="pagina" id="pagina-horarios">
+      <div class="cartao">
+        <p class="titulo-secao">📅 Melhores Dias — Semana Atual</p>
+        <div class="grade-dias">
+          <div class="dia">Seg<br>09/11</div>
+          <div class="dia melhor">Ter<br>10/11</div>
+          <div class="dia melhor">Qua<br>11/11</div>
+          <div class="dia melhor">Qui<br>12/11</div>
+          <div class="dia">Sex<br>13/11</div>
+          <div class="dia melhor">Sáb<br>14/11</div>
+          <div class="dia">Dom<br>15/11</div>
+        </div>
+      </div>
+      <div class="cartao">
+        <p class="titulo-secao">⏰ Melhores Horários — Horário de Brasília</p>
+        <div class="horarios-lista">
+          <span class="horario">07:00 — 09:00 ☀️</span>
+          <span class="horario">11:00 — 13:00 🍔</span>
+          <span class="horario-medio">15:00 — 17:00 ☕</span>
+          <span class="horario">19:00 — 22:00 🌙</span>
+        </div>
+        <p style="font-size:13px;color:var(--texto-claro);margin-top:15px;">💡 Dica: Terça, Quarta, Quinta e Sábado costumam ter mais visualizações!</p>
+      </div>
+    </div>
+
+    <div class="pagina" id="pagina-duelo">
+      <div class="cartao">
+        <p class="titulo-secao">⚔️ Duelo de Edits — Qual ficou melhor?</p>
+        <div id="form-criar-duelo">
+          <input type="text" class="input-duelo" id="nomeEdit1" placeholder="Nome do Edit 1">
+          <input type="text" class="input-duelo" id="nomeEdit2" placeholder="Nome do Edit 2">
+          <button class="botao-principal" onclick="iniciarDuelo()">🚀 Iniciar Duelo</button>
+        </div>
+        <div id="area-duelo" style="display:none;">
+          <div class="duelo-container">
+            <div class="opcao-voto" id="opcao1" onclick="votar(1)">
+              <div class="nome-edit" id="nome1">Edit 1</div>
+              <div class="contagem-votos" id="votos1">0</div>
+              <div class="porcentagem" id="porc1">50%</div>
+            </div>
+            <div style="text-align:center;font-weight:bold;font-size:20px;color:var(--texto-claro);">VS</div>
+            <div class="opcao-voto" id="opcao2" onclick="votar(2)">
+              <div class="nome-edit" id="nome2">Edit 2</div>
+              <div class="contagem-votos" id="votos2">0</div>
+              <div class="porcentagem" id="porc2">50%</div>
+            </div>
+          </div>
+          <div class="barra-progresso">
+            <div class="barra-1" id="barra1"></div>
+            <div class="barra-2" id="barra2"></div>
+          </div>
+          <div class="vencedor" id="caixaVencedor"></div>
+          <div class="botoes-duelo">
+            <button class="botao-secundario" onclick="zerarDuelo()">🔄 Novo Duelo</button>
+            <button class="botao-principal" onclick="mostrarVencedor()">🏆 Resultado</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="rodape">
+      <p>🎬 Editor Agro · Ferramenta para criadores de conteúdo</p>
+      <p>Versão 1.4 — Completo e funcionando! ✨</p>
+    </footer>
+  </div>
+
+<script>
+const musicasVirais = [
+  {nome: '⛽ Posto de Gasolina', artista: 'Seu Edit! 🔥', categoria: 'funk', estilo: 'Funk', tendencia: '👑 #1 Mais Viral!'},
+  {nome: 'Mega Funk — Batida Agro', artista: 'DJ Agro BR', categoria: 'funk', estilo: 'Mega Funk', tendencia: '🔥 Explodindo'},
+  {nome: 'Eletrofunk — Balada Total', artista: 'Prod. Nacional', categoria: 'funk', estilo: 'Eletrofunk', tendencia: '🔥 Explodindo'},
+  {nome: 'Funk Tradicional — Na Ponta do Pé', artista: 'MC Zé', categoria: 'funk', estilo: 'Funk', tendencia: '⬆️ Subindo'},
+  {nome: 'Meganejo — Moda de Fazenda', artista: 'Banda Campo & Cia', categoria: 'sertanejo', estilo: 'Meganejo', tendencia: '🔥 Explodindo'},
+  {nome: 'Sertanejo — Coração do Interior', artista: 'Zé Neto & Cristiano', categoria: 'sertanejo', estilo: 'Sertanejo', tendencia: '🔥 Explodindo'},
+  {nome: 'Forró — Pé de Serra', artista: 'Sanfoneiro Raiz', categoria: 'sertanejo', estilo: 'Forró', tendencia: '⬆️ Subindo'},
+  {nome: 'Meganejo — Festa no Interior', artista: 'Vários Artistas', categoria: 'sertanejo', estilo: 'Meganejo', tendencia: '⬆️ Subindo'},
+];
+
+let filtroAtual = 'todas';
+
+function mostrarPagina(nome){
+  document.querySelectorAll('.pagina').forEach(p=>p.classList.remove('visivel'));
+  document.getElementById(`pagina-${nome}`).classList.add('visivel');
+  document.querySelectorAll('.aba').forEach(b=>b.classList.remove('ativa'));
+  event.target.classList.add('ativa');
+}
+
+function filtrarMusicas(tipo){
+  filtroAtual = tipo;
+  document.querySelectorAll('.botao-filtro').forEach(b=>b.classList.remove('ativo-filtro'));
+  event.target.classList.add('ativo-filtro');
+  carregarMusicas();
+}
+
+function carregarMusicas(){
+  const lista = document.getElementById('lista-musicas');
+  const filtradas = filtroAtual === 'todas' ? musicasVirais : musicasVirais.filter(m=>m.categoria === filtroAtual);
+  lista.innerHTML = filtradas.map((m, i)=>`
+    <div class="musica-item ${m.categoria}">
+      <div class="posicao">${i+1}</div>
+      <div class="musica-info">
+        <div class="musica-nome">${m.nome}</div>
+        <div class="musica-artista">
+          <span class="tag-estilo ${m.categoria}">${m.estilo}</span>${m.artista}
+        </div>
+      </div>
+      <span class="musica-tendencia">${m.tendencia}</span>
+    </div>
+  `).join('');
+}
+
+let edit1 = {nome: '', votos: 0};
+let edit2 = {nome: '', votos: 0};
+let dueloAtivo = false;
+
+function iniciarDuelo(){
+  const n1 = document.getElementById('nomeEdit1').value.trim();
+  const n2 = document.getElementById('nomeEdit2').value.trim();
+  if(!n1 || !n2){ alert('⚠️ Coloque os nomes dos dois Edits!'); return; }
+  edit1 = {nome: n1, votos: 0};
+  edit2 = {nome: n2, votos: 0};
+  dueloAtivo = true;
+  document.getElementById('form-criar-duelo').style.display = 'none';
+  document.getElementById('area-duelo').style.display = 'block';
+  document.getElementById('nome1').textContent = n1;
+  document.getElementById('nome2').textContent = n2;
+  document.getElementById('caixaVencedor').style.display = 'none';
+  atualizarContagem();
+}
+
+function votar(opcao){
+  if(!dueloAtivo) return;
+  if(opcao === 1) edit1.votos++;
+  else edit2.votos++;
+  atualizarContagem();
+  document.getElementById(`opcao${opcao}`).classList.add(opcao===1?'selecionada-1':'selecionada-2');
+  setTimeout(()=>{
+    document.getElementById('opcao1').classList.remove('selecionada-1');
+    document.getElementById('opcao2').classList.remove('selecionada-2');
+  }, 200);
+}
+
+function atualizarContagem(){
+  const total = edit1.votos + edit2.votos || 1;
+  const p1 = Math.round((edit1.votos / total) * 100);
+  const p2 = 100 - p1;
+  document.getElementById('votos1').textContent = edit1.votos;
+  document.getElementById('votos2').textContent = edit2.votos;
+  document.getElementById('porc1').textContent = p1 + '%';
+  document.getElementById('porc2').textContent = p2 + '%';
+  document.getElementById('barra1').style.width = p1 + '%';
+  document.getElementById('barra2').style.width = p2 + '%';
+}
+
+function mostrarVencedor(){
+  if(!dueloAtivo){ alert('⚠️ Crie um duelo primeiro!'); return; }
+  const caixa = document.getElementById('caixaVencedor');
+  caixa.style.display = 'block';
+  if(edit1.votos > edit2.votos){
+    caixa.innerHTML = `🏆 VENCEDOR: ${edit1.nome}! 🎉<br><small>${edit1.votos} votos vs ${edit2.votos} votos</small>`;
+  }else if(edit2.votos > edit1.votos){
+    caixa.innerHTML = `🏆 VENCEDOR: ${edit2.nome}! 🎉<br><small>${edit2.votos} votos vs ${edit1.votos} votos</small>`;
+  }else{
+    caixa.innerHTML = `🤝 EMPATE! Os dois ficaram iguais!<br><small>${edit1.votos} votos cada um</small>`;
+  }
+}
+
+function zerarDuelo(){
+  dueloAtivo = false;
+  edit1 = {nome: '', votos: 0};
+  edit2 = {nome: '', votos: 0};
+  document.getElementById('form-criar-duelo').style.display = 'block';
+  document.getElementById('area-duelo').style.display = 'none';
+  document.getElementById('nomeEdit1').value = '';
+  document.getElementById('nomeEdit2').value = '';
+  document.getElementById('caixaVencedor').style.display = 'none';
+}
+
+carregarMusicas();
+</script>
+</body>
+</html>
